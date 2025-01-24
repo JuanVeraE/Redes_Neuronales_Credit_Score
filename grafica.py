@@ -1,44 +1,45 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-colors = ['#4dab6d', "#72c66e", "#c1da64", "#f6ee54", "#fabd57", "#f36d54", "#ee4d55"]
+def create_gauge(value, min_value=0, max_value=100, title="Half-Circle Gauge"):
+    fig, ax = plt.subplots(figsize=(6, 3))
+    ax.axis('off')  # Turn off the axes
 
-values = [100,80,60,40,20,0,-20, -40]
+    # Define the segments (ranges) and their colors
+    segments = [20, 20, 20, 20, 20]  # Five segments for equal spacing
+    colors = ['#ff3300', '#ff6600', '#ffcc00', '#ccff66', '#66cc33']
 
-x_axis_vals = [0, 0.44, 0.88,1.32,1.76,2.2,2.64]
+    # Draw the colored segments (only for half-circle)
+    wedges, _ = ax.pie(
+        segments,
+        radius=1,
+        colors=colors,
+        startangle=180,  # Start at the top (180 degrees)
+        counterclock=False,  # Draw clockwise
+        wedgeprops={"width": 0.3, "edgecolor": "white"}
+    )
 
-def gauge_chart():
+    # Calculate the angle for the needle
+    angle = 180 - (180 * (value - min_value) / (max_value - min_value))  # Map value to angle
+    angle_rad = np.radians(angle)
 
-    fig = plt.figure(figsize=(18,18))
+    # Plot the needle
+    ax.plot(
+        [0, 0.7 * np.cos(angle_rad)],  # X coordinates
+        [0, 0.7 * np.sin(angle_rad)],  # Y coordinates
+        color="black", linewidth=3
+    )
+    ax.plot(0, 0, 'o', color='gray', markersize=10)  # Center circle for the needle pivot
 
-    ax = fig.add_subplot(projection="polar");
+    # Add title and display the value
+    plt.title(title, fontsize=14, fontweight="bold")
+    plt.text(0, -0.15, f"{value}", horizontalalignment="center", fontsize=12, fontweight="bold")
 
-    ax.bar(x=[0, 0.44, 0.88,1.32,1.76,2.2,2.64], width=0.5, height=0.5, bottom=2,
-        linewidth=3, edgecolor="white",
-        color=colors, align="edge");
+    # Set limits for the half-circle display
+    ax.set_xlim(-1.1, 1.1)
+    ax.set_ylim(-0.1, 1.1)
 
-    plt.annotate("High Performing", xy=(0.16,2.1), rotation=-75, color="white", fontweight="bold");
-    plt.annotate("Sustainable", xy=(0.65,2.08), rotation=-55, color="white", fontweight="bold");
-    plt.annotate("Maturing", xy=(1.14,2.1), rotation=-32, color="white", fontweight="bold");
-    plt.annotate("Developing", xy=(1.62,2.2), color="white", fontweight="bold");
-    plt.annotate("Foundational", xy=(2.08,2.25), rotation=20, color="white", fontweight="bold");
-    plt.annotate("Volatile", xy=(2.46,2.25), rotation=45, color="white", fontweight="bold");
-    plt.annotate("Unsustainable", xy=(3.0,2.25), rotation=75, color="white", fontweight="bold");
+    return fig
 
-    for loc, val in zip([0, 0.44, 0.88,1.32,1.76,2.2,2.64, 3.14], values):
-        plt.annotate(val, xy=(loc, 2.5), ha="right" if val<=20 else "left");
-
-    plt.annotate("50", xytext=(0,0), xy=(1.1, 2.0),
-                arrowprops=dict(arrowstyle="wedge, tail_width=0.5", color="black", shrinkA=0),
-                bbox=dict(boxstyle="circle", facecolor="black", linewidth=2.0, ),
-                fontsize=45, color="white", ha="center"
-                );
-
-
-    plt.title("Performance Gauge Chart", loc="center", pad=20, fontsize=35, fontweight="bold");
-
-    plt.tight_layout();
-    plt.axis("off");    
-    ax.set_axis_off();
-
-    plt.show();
+# Example usage
+create_gauge(value=25, title="Performance Indicator")
