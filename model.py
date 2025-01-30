@@ -1,3 +1,10 @@
+from tensorflow.keras.models import load_model
+import os
+
+model_path = 'modelo.h5'
+
+modelo = load_model(model_path)
+=======
 import pandas as pd
 import numpy as np
 import joblib
@@ -184,5 +191,3 @@ scorecard_scores = scorecard_scores.values.reshape(100, 1)
 
 y_scores = person.dot(scorecard_scores)
 print(y_scores)
-
-
