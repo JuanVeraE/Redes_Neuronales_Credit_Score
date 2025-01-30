@@ -1,44 +1,75 @@
-import matplotlib.pyplot as plt
 import numpy as np
-
-colors = ['#4dab6d', "#72c66e", "#c1da64", "#f6ee54", "#fabd57", "#f36d54", "#ee4d55"]
-
-values = [100,80,60,40,20,0,-20, -40]
-
-x_axis_vals = [0, 0.44, 0.88,1.32,1.76,2.2,2.64]
-
-def gauge_chart():
-
-    fig = plt.figure(figsize=(18,18))
-
-    ax = fig.add_subplot(projection="polar");
-
-    ax.bar(x=[0, 0.44, 0.88,1.32,1.76,2.2,2.64], width=0.5, height=0.5, bottom=2,
-        linewidth=3, edgecolor="white",
-        color=colors, align="edge");
-
-    plt.annotate("High Performing", xy=(0.16,2.1), rotation=-75, color="white", fontweight="bold");
-    plt.annotate("Sustainable", xy=(0.65,2.08), rotation=-55, color="white", fontweight="bold");
-    plt.annotate("Maturing", xy=(1.14,2.1), rotation=-32, color="white", fontweight="bold");
-    plt.annotate("Developing", xy=(1.62,2.2), color="white", fontweight="bold");
-    plt.annotate("Foundational", xy=(2.08,2.25), rotation=20, color="white", fontweight="bold");
-    plt.annotate("Volatile", xy=(2.46,2.25), rotation=45, color="white", fontweight="bold");
-    plt.annotate("Unsustainable", xy=(3.0,2.25), rotation=75, color="white", fontweight="bold");
-
-    for loc, val in zip([0, 0.44, 0.88,1.32,1.76,2.2,2.64, 3.14], values):
-        plt.annotate(val, xy=(loc, 2.5), ha="right" if val<=20 else "left");
-
-    plt.annotate("50", xytext=(0,0), xy=(1.1, 2.0),
-                arrowprops=dict(arrowstyle="wedge, tail_width=0.5", color="black", shrinkA=0),
-                bbox=dict(boxstyle="circle", facecolor="black", linewidth=2.0, ),
-                fontsize=45, color="white", ha="center"
-                );
+import matplotlib.pyplot as plt
+from matplotlib.patches import Arc
 
 
-    plt.title("Performance Gauge Chart", loc="center", pad=20, fontsize=35, fontweight="bold");
+def create_gauge(value, min_value=0, max_value=100):
+    """
+    Crea un gráfico tipo gauge con rangos de colores.
 
-    plt.tight_layout();
-    plt.axis("off");    
-    ax.set_axis_off();
+    Args:
+        value (float): Valor actual a mostrar en el gauge (0-100)
+        min_value (float): Valor mínimo del rango
+        max_value (float): Valor máximo del rango
 
-    plt.show();
+    Returns:
+        matplotlib.figure.Figure: La figura del gráfico
+    """
+    # Crear la figura y el eje
+    fig, ax = plt.subplots(figsize=(8, 4))
+
+    # Configurar los límites y aspecto del eje
+    ax.set_aspect('equal')
+    ax.set_xlim(-1.2, 1.2)
+    ax.set_ylim(-0.6, 1.2)
+
+    # Ocultar los ejes
+    ax.axis('off')
+
+    # Definir colores para cada segmento (ahora de rojo a verde)
+    colors = ['#ff3232', '#ff6b32', '#ffa332', '#7ab55c', '#32b532']  # Rojo a verde
+
+    # Definir los rangos para cada segmento (de 0 a 100)
+    ranges = [
+        (0, 20),  # Rojo
+        (20, 40),  # Naranja rojizo
+        (40, 60),  # Naranja
+        (60, 80),  # Verde claro
+        (80, 100)  # Verde
+    ]
+
+    # Dibujar los segmentos del arco
+    radius = 1
+    start_angle = 180  # Comenzar desde la izquierda
+
+    for i, (range_min, range_max) in enumerate(ranges):
+        # Calcular ángulos para cada segmento
+        angle_min = start_angle * (1 - (range_min - min_value) / (max_value - min_value))
+        angle_max = start_angle * (1 - (range_max - min_value) / (max_value - min_value))
+
+        arc = Arc((0, 0), radius * 2, radius * 2,
+                  theta1=angle_max, theta2=angle_min,
+                  angle=0, color=colors[i], lw=20)
+        ax.add_patch(arc)
+
+    # Calcular ángulo para el valor actual
+    needle_angle = start_angle * (1 - (value - min_value) / (max_value - min_value))
+    needle_angle_rad = np.radians(needle_angle)
+
+    # Dibujar la aguja
+    needle_length = 0.9
+    x = needle_length * np.cos(needle_angle_rad)
+    y = needle_length * np.sin(needle_angle_rad)
+
+    # Triángulo para la aguja
+    ax.plot([0, x], [0, y], color='black', lw=3, zorder=5)
+
+    # Círculo central
+    circle = plt.Circle((0, 0), 0.1, color='#404040', zorder=6)
+    ax.add_artist(circle)
+
+    # Añadir el valor actual
+    ax.text(0, -0.2, f'{value}', ha='center', va='center',
+            fontsize=24, fontweight='bold', color='#404040')
+
+    return fig
