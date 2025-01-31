@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Arc
 
 
-def create_gauge(value, min_value=0, max_value=100):
+def create_gauge(value, value_print, min_value=0, max_value=100):
     """
     Crea un gráfico tipo gauge con rangos de colores.
 
@@ -69,7 +69,7 @@ def create_gauge(value, min_value=0, max_value=100):
     ax.add_artist(circle)
 
     # Añadir el valor actual
-    ax.text(0, -0.2, f'{value}', ha='center', va='center',
+    ax.text(0, -0.2, f'{value_print}', ha='center', va='center',
             fontsize=24, fontweight='bold', color='#404040')
 
     return fig
